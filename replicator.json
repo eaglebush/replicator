@@ -1,0 +1,50 @@
+{
+    "subjects" : [
+            {
+                "subjectroot" : "frt.freight.init",
+                "columns": [
+                    {
+                        "name" : "freight_key",
+                        "type": "char(38)",
+                        "null": true
+                    },
+                    {
+                        "name" : "ref_address",
+                        "type": "nvarchar(200)",
+                        "null": true
+                    },
+                    {
+                        "name" : "ref_amount",
+                        "type": "decimal(18,3)",
+                        "null": true
+                    }               
+                ],
+                "datakeys": [
+                    "freight_key"
+                ]
+            },
+            {
+                "subjectroot" : "frt.freightitem.init",
+                "columns": [
+                    {
+                        "name" : "freightitem_key",
+                        "type": "char(38)",
+                        "null": true
+                    }, 
+                    {
+                        "name" : "freight_key",
+                        "type": "char(38)",
+                        "null": true
+                    },                  
+                    {
+                        "name" : "line_num",
+                        "type": "varchar(12)",
+                        "null": true
+                    }               
+                ],
+                "datakeys": [
+                    "freightitem_key"
+                ]
+            }
+        ]
+}
