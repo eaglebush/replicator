@@ -274,9 +274,9 @@ func anytstr(value interface{}) string {
 	case uint8:
 		b = strconv.FormatUint(uint64(value.(uint8)), 10)
 	case uint16:
-		b = strconv.FormatUint(uint64(value.(int16)), 10)
+		b = strconv.FormatUint(uint64(value.(uint16)), 10)
 	case uint32:
-		b = strconv.FormatUint(uint64(value.(int32)), 10)
+		b = strconv.FormatUint(uint64(value.(uint32)), 10)
 	case uint64:
 		b = strconv.FormatUint(uint64(value.(uint64)), 10)
 	case float32:
@@ -292,7 +292,7 @@ func anytstr(value interface{}) string {
 			}
 		}
 	case time.Time:
-		b = "'" + value.(time.Time).Format(time.RFC3339) + "'"
+		b = "'" + value.(time.Time).Format(`2006-01-02 15:04:05`) + "'"
 	}
 
 	return b
