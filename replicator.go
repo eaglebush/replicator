@@ -264,7 +264,7 @@ func anytstr(value interface{}) string {
 		// check if the string is a date
 		t, err := time.Parse(time.RFC3339, bstr)
 		if err == nil {
-			b = "'" + t.Format(longForm) + "'"
+			b = t.Format(longForm)
 			break
 		}
 
@@ -302,7 +302,7 @@ func anytstr(value interface{}) string {
 			}
 		}
 	case time.Time:
-		b = "'" + value.(time.Time).Format(longForm) + "'"
+		b = value.(time.Time).Format(longForm)
 	}
 
 	return b

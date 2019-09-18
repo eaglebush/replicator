@@ -243,4 +243,7 @@ func TestTimeConversion(t *testing.T) {
 
 	ifc = `TEST0001`
 	log.Println(anytstr(ifc))
+
+	ifc = 3
+	log.Println(anytstr(ifc))
 }
