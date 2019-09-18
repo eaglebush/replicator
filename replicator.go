@@ -66,7 +66,7 @@ func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumn
 	sql += `CREATE TABLE ` + tableName + ` (`
 	for i, v := range tableColumns {
 		sql += `	` + v.Name + ` ` + v.Type + ` `
-		if v.Null {
+		if !v.Null {
 			sql += `NOT `
 		}
 		sql += `NULL`
