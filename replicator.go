@@ -258,7 +258,7 @@ func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replic
 func rawtstr(value []byte) string {
 	var b string
 
-	bstr := string(value)
+	bstr := strings.Trim(string(value), `"`)
 	var err error
 	var f interface{}
 
@@ -322,7 +322,7 @@ func rawtstr(value []byte) string {
 		return b
 	}
 
-	b = strings.Trim(bstr, `"`)
+	b = bstr
 	return b
 }
 
