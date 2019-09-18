@@ -257,7 +257,6 @@ func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replic
 
 func rawtstr(value []byte) string {
 	var b string
-	const longForm = `2006-01-02 15:04:05`
 
 	bstr := string(value)
 	var err error
@@ -266,7 +265,7 @@ func rawtstr(value []byte) string {
 	// check if the string is a date
 	f, err = time.Parse(time.RFC3339, bstr)
 	if err == nil {
-		b = f.(time.Time).Format(longForm)
+		b = f.(time.Time).Format(`2006-01-02 15:04:05`)
 		return b
 	}
 
