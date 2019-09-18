@@ -95,7 +95,8 @@ func (r *Replicator) Insert(dh *datahelper.DataHelper, subject string, msgData [
 		return err
 	}
 
-	var objmap map[string]interface{}
+	//var objmap map[string]interface{}
+	var objmap map[string]json.RawMessage
 	err = json.Unmarshal(msgData, &objmap)
 	if err != nil {
 		return err
@@ -108,7 +109,8 @@ func (r *Replicator) Insert(dh *datahelper.DataHelper, subject string, msgData [
 
 	for k, v := range objmap {
 		cols += cma + k
-		vals += cma + `'` + strings.Replace(anytstr(v), `'`, `''`, -1) + `'`
+
+		vals += cma + `'` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
 		cma = `, `
 	}
 
@@ -136,7 +138,7 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 		return err
 	}
 
-	var objmap map[string]interface{}
+	var objmap map[string]json.RawMessage
 	err = json.Unmarshal(msgData, &objmap)
 
 	cma := ``
@@ -144,8 +146,8 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 	sql := ``
 	valid := true
 
-	var dataKeyValues map[string]interface{}
-	dataKeyValues = make(map[string]interface{})
+	var dataKeyValues map[string][]byte
+	dataKeyValues = make(map[string][]byte)
 
 	for k, v := range objmap {
 		valid = true
@@ -159,7 +161,7 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 		}
 
 		if valid {
-			colvals += cma + k + `='` + strings.Replace(anytstr(v), `'`, `''`, -1) + `'`
+			colvals += cma + k + `='` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
 			cma = `, `
 		}
 
@@ -175,7 +177,7 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 	// Get filters
 	cma = ``
 	for k, v := range dataKeyValues {
-		sql += cma + k + `='` + strings.Replace(anytstr(v), `'`, `''`, -1) + `'`
+		sql += cma + k + `='` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
 		cma = ` AND `
 	}
 
@@ -194,14 +196,14 @@ func (r *Replicator) Delete(dh *datahelper.DataHelper, subject string, msgData [
 		return err
 	}
 
-	var objmap map[string]interface{}
+	var objmap map[string]json.RawMessage
 	err = json.Unmarshal(msgData, &objmap)
 
 	cma := ``
 	sql := ``
 
-	var dataKeyValues map[string]interface{}
-	dataKeyValues = make(map[string]interface{})
+	var dataKeyValues map[string][]byte
+	dataKeyValues = make(map[string][]byte)
 
 	for k, v := range objmap {
 		// check if the column is in the datakeys
@@ -217,7 +219,7 @@ func (r *Replicator) Delete(dh *datahelper.DataHelper, subject string, msgData [
 	// Get filters
 	cma = ``
 	for k, v := range dataKeyValues {
-		sql += cma + k + `='` + strings.Replace(anytstr(v), `'`, `''`, -1) + `'`
+		sql += cma + k + `='` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
 		cma = ` AND `
 	}
 
@@ -253,60 +255,125 @@ func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replic
 	return &rp, nil
 }
 
-func anytstr(value interface{}) string {
+func rawtstr(value []byte) string {
 	var b string
 	const longForm = `2006-01-02 15:04:05`
 
-	switch value.(type) {
-	case string:
-		bstr := value.(string)
+	bstr := string(value)
+	var err error
+	var f interface{}
 
-		// check if the string is a date
-		t, err := time.Parse(time.RFC3339, bstr)
-		if err == nil {
-			b = t.Format(longForm)
-			break
-		}
+	// check if the string is a date
+	f, err = time.Parse(time.RFC3339, bstr)
+	if err == nil {
+		b = f.(time.Time).Format(longForm)
+		return b
+	}
 
-		b = bstr
-	case int:
-		b = strconv.FormatInt(int64(value.(int)), 10)
-	case int8:
-		b = strconv.FormatInt(int64(value.(int8)), 10)
-	case int16:
-		b = strconv.FormatInt(int64(value.(int16)), 10)
-	case int32:
-		b = strconv.FormatInt(int64(value.(int32)), 10)
-	case int64:
-		b = strconv.FormatInt(value.(int64), 10)
-	case uint:
-		b = strconv.FormatUint(uint64(value.(uint)), 10)
-	case uint8:
-		b = strconv.FormatUint(uint64(value.(uint8)), 10)
-	case uint16:
-		b = strconv.FormatUint(uint64(value.(uint16)), 10)
-	case uint32:
-		b = strconv.FormatUint(uint64(value.(uint32)), 10)
-	case uint64:
-		b = strconv.FormatUint(uint64(value.(uint64)), 10)
-	case float32:
-		b = fmt.Sprintf("%f", value.(float32))
-	case float64:
-		b = fmt.Sprintf("%f", value.(float64))
-	case bool:
+	f, err = strconv.ParseUint(bstr, 10, 64)
+	if err == nil {
+		b = strconv.FormatUint(f.(uint64), 10)
+		return b
+	}
+
+	f, err = strconv.ParseInt(bstr, 10, 64)
+	if err == nil {
+		b = strconv.FormatInt(f.(int64), 10)
+		return b
+	}
+
+	f, err = strconv.ParseFloat(bstr, 32)
+	if err == nil {
+		// check the length of the decimal places
+		dotp := strings.Index(bstr, `.`)
+		numdec := strconv.Itoa(len(bstr[dotp+1:]))
+		ffmt := "%." + numdec + "f"
+
+		b = fmt.Sprintf(ffmt, float32(f.(float64)))
+		return b
+	}
+
+	f, err = strconv.ParseFloat(bstr, 64)
+	if err == nil {
+		// check the length of the decimal places
+		dotp := strings.Index(bstr, `.`)
+		numdec := strconv.Itoa(len(bstr[dotp+1:]))
+		ffmt := "%." + numdec + "f"
+
+		b = fmt.Sprintf(ffmt, f.(float64))
+		return b
+	}
+
+	f, err = strconv.ParseBool(bstr)
+	if err == nil {
 		b = "0"
-		s := strings.ToLower(value.(string))
+		s := strings.ToLower(bstr)
 		if len(s) > 0 {
-			if s == "true" || s == "on" || s == "yes" || s == "1" || s == "-1" {
+			if s == "true" || s == "on" || s == "yes" || s == "1" || s == "-1" || s == "t" {
 				b = "1"
 			}
 		}
-	case time.Time:
-		b = value.(time.Time).Format(longForm)
+		return b
 	}
 
+	b = strings.Trim(bstr, `"`)
 	return b
 }
+
+// func anytstr(value interface{}) string {
+// 	var b string
+// 	const longForm = `2006-01-02 15:04:05`
+
+// 	switch value.(type) {
+// 	case string:
+// 		bstr := value.(string)
+
+// 		// check if the string is a date
+// 		t, err := time.Parse(time.RFC3339, bstr)
+// 		if err == nil {
+// 			b = t.Format(longForm)
+// 			break
+// 		}
+
+// 		b = bstr
+// 	case int:
+// 		b = strconv.FormatInt(int64(value.(int)), 10)
+// 	case int8:
+// 		b = strconv.FormatInt(int64(value.(int8)), 10)
+// 	case int16:
+// 		b = strconv.FormatInt(int64(value.(int16)), 10)
+// 	case int32:
+// 		b = strconv.FormatInt(int64(value.(int32)), 10)
+// 	case int64:
+// 		b = strconv.FormatInt(value.(int64), 10)
+// 	case uint:
+// 		b = strconv.FormatUint(uint64(value.(uint)), 10)
+// 	case uint8:
+// 		b = strconv.FormatUint(uint64(value.(uint8)), 10)
+// 	case uint16:
+// 		b = strconv.FormatUint(uint64(value.(uint16)), 10)
+// 	case uint32:
+// 		b = strconv.FormatUint(uint64(value.(uint32)), 10)
+// 	case uint64:
+// 		b = strconv.FormatUint(uint64(value.(uint64)), 10)
+// 	case float32:
+// 		b = fmt.Sprintf("%f", value.(float32))
+// 	case float64:
+// 		b = fmt.Sprintf("%f", value.(float64))
+// 	case bool:
+// 		b = "0"
+// 		s := strings.ToLower(value.(string))
+// 		if len(s) > 0 {
+// 			if s == "true" || s == "on" || s == "yes" || s == "1" || s == "-1" {
+// 				b = "1"
+// 			}
+// 		}
+// 	case time.Time:
+// 		b = value.(time.Time).Format(longForm)
+// 	}
+
+// 	return b
+// }
 
 // BuildTableName - Build replicator table
 func BuildTableName(subject string) (string, error) {

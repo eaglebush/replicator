@@ -70,7 +70,7 @@ func TestInsertReplicator(t *testing.T) {
 	}
 
 	// define table
-	err = r.Init(dh, `frt.freight`, []Column{
+	err = r.Init(dh, `frt.freight.init`, []Column{
 		Column{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
@@ -86,6 +86,16 @@ func TestInsertReplicator(t *testing.T) {
 			Type: `decimal(18,3)`,
 			Null: false,
 		},
+		Column{
+			Name: `priority`,
+			Type: `int`,
+			Null: false,
+		},
+		Column{
+			Name: `priority2`,
+			Type: `int`,
+			Null: false,
+		},
 	}, []string{
 		`freight_key`,
 	})
@@ -95,12 +105,14 @@ func TestInsertReplicator(t *testing.T) {
 	}
 
 	data := `{
-				"freight_key": "1QuIyNTdgyCQtxHeVuHxROrtw3B           ",
+				"freight_key": "1QuIyNTdgyCQtxHeVuHxROrtw3B",
 				"ref_address": "21 Jump St. Manila",
-				"ref_amount": 1.10
+				"ref_amount": 1.10,
+				"priority": 3,
+				"priority2": -3
 			 }`
 
-	err = r.Insert(dh, `frt.freight.freightcreated`, []byte(data))
+	err = r.Insert(dh, `frt.freight.created`, []byte(data))
 	if err != nil {
 		log.Printf("Error found: %s\r\n", err.Error())
 	}
@@ -124,7 +136,7 @@ func TestUpdateReplicator(t *testing.T) {
 	}
 
 	// define table
-	err = r.Init(dh, `frt.freight`, []Column{
+	err = r.Init(dh, `frt.freight.init`, []Column{
 		Column{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
@@ -149,12 +161,12 @@ func TestUpdateReplicator(t *testing.T) {
 	}
 
 	data := `{
-				"freight_key": "1QuIyNTdgyCQtxHeVuHxROrtw3B           ",
+				"freight_key": "1QuIyNTdgyCQtxHeVuHxROrtw3B",
 				"ref_address": "21 Jump St. Quezon City",
 				"ref_amount": 1.12
 			 }`
 
-	err = r.Update(dh, `frt.freight`, []byte(data))
+	err = r.Update(dh, `frt.freight.updated`, []byte(data))
 	if err != nil {
 		log.Printf("Error found: %s\r\n", err.Error())
 	}
@@ -178,7 +190,7 @@ func TestDeleteReplicator(t *testing.T) {
 	}
 
 	// define table
-	err = r.Init(dh, `frt.freight`, []Column{
+	err = r.Init(dh, `frt.freight.init`, []Column{
 		Column{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
@@ -203,12 +215,12 @@ func TestDeleteReplicator(t *testing.T) {
 	}
 
 	data := `{
-				"freight_key": "1QuIyNTdgyCQtxHeVuHxROrtw3B           ",
+				"freight_key": "1QuIyNTdgyCQtxHeVuHxROrtw3B",
 				"ref_address": "21 Jump St. Quezon City",
 				"ref_amount": 1.10
 			 }`
 
-	err = r.Delete(dh, `frt.freight`, []byte(data))
+	err = r.Delete(dh, `frt.freight.deleted`, []byte(data))
 	if err != nil {
 		log.Printf("Error found: %s\r\n", err.Error())
 	}
@@ -234,16 +246,16 @@ func TestLoadReplicator(t *testing.T) {
 }
 
 func TestTimeConversion(t *testing.T) {
-	var ifc interface{}
-	ifc = `2019-09-11T00:00:00Z`
-	log.Println(anytstr(ifc))
+	// var ifc interface{}
+	// ifc = `2019-09-11T00:00:00Z`
+	// log.Println(anytstr(ifc))
 
-	ifc = `2019-09-18T06:24:15.2669612Z`
-	log.Println(anytstr(ifc))
+	// ifc = `2019-09-18T06:24:15.2669612Z`
+	// log.Println(anytstr(ifc))
 
-	ifc = `TEST0001`
-	log.Println(anytstr(ifc))
+	// ifc = `TEST0001`
+	// log.Println(anytstr(ifc))
 
-	ifc = 3
-	log.Println(anytstr(ifc))
+	// ifc = 3
+	// log.Println(anytstr(ifc))
 }
