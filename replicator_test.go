@@ -232,3 +232,15 @@ func TestLoadReplicator(t *testing.T) {
 	rp, err := LoadReplicator(dh, `./replicator.json`)
 	log.Printf("Replicators: %v", rp)
 }
+
+func TestTimeConversion(t *testing.T) {
+	var ifc interface{}
+	ifc = `2019-09-11T00:00:00Z`
+	log.Println(anytstr(ifc))
+
+	ifc = `2019-09-18T06:24:15.2669612Z`
+	log.Println(anytstr(ifc))
+
+	ifc = `TEST0001`
+	log.Println(anytstr(ifc))
+}

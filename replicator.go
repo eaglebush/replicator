@@ -255,10 +255,20 @@ func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replic
 
 func anytstr(value interface{}) string {
 	var b string
+	const longForm = `2006-01-02 15:04:05`
 
 	switch value.(type) {
 	case string:
-		b = value.(string)
+		bstr := value.(string)
+
+		// check if the string is a date
+		t, err := time.Parse(time.RFC3339, bstr)
+		if err == nil {
+			b = "'" + t.Format(longForm) + "'"
+			break
+		}
+
+		b = bstr
 	case int:
 		b = strconv.FormatInt(int64(value.(int)), 10)
 	case int8:
@@ -292,7 +302,7 @@ func anytstr(value interface{}) string {
 			}
 		}
 	case time.Time:
-		b = "'" + value.(time.Time).Format(`2006-01-02 15:04:05`) + "'"
+		b = "'" + value.(time.Time).Format(longForm) + "'"
 	}
 
 	return b
