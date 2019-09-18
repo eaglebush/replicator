@@ -38,16 +38,10 @@ var dataKeys map[string][]string
 
 // Init - initialize table
 func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumns []Column, dataKeyColumns []string) error {
-	subject = strings.ToLower(subject)
-
-	// Check subject composition. Default composition should be in <api>.<table>.<event> format. There must be 2 dots in the subject
-	tbln := strings.Split(subject, `.`)
-	if len(tbln) != 3 {
-		return errors.New(`The subject is not compliant with the name convention. Convention should be in <api>.<table>.<event> format`)
+	tableName, err := BuildTableName(subject)
+	if err != nil {
+		return err
 	}
-
-	// create a table name from the event/subject
-	tableName := tbln[0] + `.` + tbln[1]
 
 	// Check if table is present in the subjectTable map
 	for k := range subjectTable {
@@ -85,7 +79,7 @@ func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumn
 	sql += `);`
 
 	// create table it does not exist
-	_, err := dh.Exec(sql)
+	_, err = dh.Exec(sql)
 	if err != nil {
 		// table might have existed
 		log.Printf("Error Init: %s", err.Error())
@@ -96,21 +90,13 @@ func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumn
 
 // Insert - insert action to database
 func (r *Replicator) Insert(dh *datahelper.DataHelper, subject string, msgData []byte) error {
-	// Check subject composition. Default composition should be in <api>.<table>.<event> format. There must be 2 dots in the subject
-	tbln := strings.Split(subject, `.`)
-	if len(tbln) != 3 {
-		return errors.New(`The subject is not compliant with the name convention. Convention should be in <api>.<table>.<event> format`)
-	}
-
-	// create a table name from the event/subject
-	tableName := tbln[0] + `.` + tbln[1]
-
-	for _, rep := range []string{`.`, `,`} {
-		tableName = strings.Replace(tableName, rep, `_`, -1)
+	tableName, err := BuildTableName(subject)
+	if err != nil {
+		return err
 	}
 
 	var objmap map[string]interface{}
-	err := json.Unmarshal(msgData, &objmap)
+	err = json.Unmarshal(msgData, &objmap)
 	if err != nil {
 		return err
 	}
@@ -145,21 +131,13 @@ func (r *Replicator) Insert(dh *datahelper.DataHelper, subject string, msgData [
 
 // Update - update action to database
 func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData []byte) error {
-	// Check subject composition. Default composition should be in <api>.<table>.<event> format. There must be 2 dots in the subject
-	tbln := strings.Split(subject, `.`)
-	if len(tbln) != 3 {
-		return errors.New(`The subject is not compliant with the name convention. Convention should be in <api>.<table>.<event> format`)
-	}
-
-	// create a table name from the event/subject
-	tableName := tbln[0] + `.` + tbln[1]
-
-	for _, rep := range []string{`.`, `,`} {
-		tableName = strings.Replace(tableName, rep, `_`, -1)
+	tableName, err := BuildTableName(subject)
+	if err != nil {
+		return err
 	}
 
 	var objmap map[string]interface{}
-	err := json.Unmarshal(msgData, &objmap)
+	err = json.Unmarshal(msgData, &objmap)
 
 	cma := ``
 	colvals := ``
@@ -211,21 +189,13 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 
 // Delete - delete a record in the database
 func (r *Replicator) Delete(dh *datahelper.DataHelper, subject string, msgData []byte) error {
-	// Check subject composition. Default composition should be in <api>.<table>.<event> format. There must be 2 dots in the subject
-	tbln := strings.Split(subject, `.`)
-	if len(tbln) != 3 {
-		return errors.New(`The subject is not compliant with the name convention. Convention should be in <api>.<table>.<event> format`)
-	}
-
-	// create a table name from the event/subject
-	tableName := tbln[0] + `.` + tbln[1]
-
-	for _, rep := range []string{`.`, `,`} {
-		tableName = strings.Replace(tableName, rep, `_`, -1)
+	tableName, err := BuildTableName(subject)
+	if err != nil {
+		return err
 	}
 
 	var objmap map[string]interface{}
-	err := json.Unmarshal(msgData, &objmap)
+	err = json.Unmarshal(msgData, &objmap)
 
 	cma := ``
 	sql := ``
@@ -326,4 +296,24 @@ func anytstr(value interface{}) string {
 	}
 
 	return b
+}
+
+// BuildTableName - Build replicator table
+func BuildTableName(subject string) (string, error) {
+	subject = strings.TrimSpace(strings.ToLower(subject))
+
+	// Check subject composition. Default composition should be in <api>.<table>.<event> format. There must be 2 dots in the subject
+	tbln := strings.Split(subject, `.`)
+	if len(tbln) != 3 {
+		return ``, errors.New(`The subject is not compliant with the name convention. Convention should be in <api>.<table>.<event> format`)
+	}
+
+	// create a table name from the event/subject
+	tableName := tbln[0] + `.` + tbln[1]
+
+	for _, rep := range []string{`.`, `,`} {
+		tableName = strings.Replace(tableName, rep, `_`, -1)
+	}
+
+	return tableName, nil
 }
