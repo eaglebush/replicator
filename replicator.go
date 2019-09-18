@@ -263,6 +263,13 @@ func rawtstr(value []byte) string {
 	var f interface{}
 
 	// check if the string is a date
+	f, err = time.Parse(time.RFC3339Nano, bstr)
+	if err == nil {
+		b = f.(time.Time).Format(`2006-01-02 15:04:05`)
+		return b
+	}
+
+	// check if the string is a date
 	f, err = time.Parse(time.RFC3339, bstr)
 	if err == nil {
 		b = f.(time.Time).Format(`2006-01-02 15:04:05`)
