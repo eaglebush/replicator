@@ -6,17 +6,15 @@
                     {
                         "name" : "freight_key",
                         "type": "char(38)",
-                        "null": true
+                        "null": false
                     },
                     {
                         "name" : "ref_address",
-                        "type": "nvarchar(200)",
-                        "null": true
+                        "type": "nvarchar(200)"
                     },
                     {
                         "name" : "ref_amount",
-                        "type": "decimal(18,3)",
-                        "null": true
+                        "type": "decimal(18,3)"
                     }               
                 ],
                 "datakeys": [

@@ -27,21 +27,22 @@ func TestInitReplicator(t *testing.T) {
 	}
 
 	// define table
+	fl := false
 	err = r.Init(dh, `frt.freight`, []Column{
 		Column{
 			Name: `freight_key`,
 			Type: `nvarchar(38)`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
-			Null: false,
+			Null: &fl,
 		},
 	}, []string{
 		`freight_key`,
@@ -70,31 +71,32 @@ func TestInsertReplicator(t *testing.T) {
 	}
 
 	// define table
+	fl := false
 	err = r.Init(dh, `frt.freight.init`, []Column{
 		Column{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `priority`,
 			Type: `int`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `priority2`,
 			Type: `int`,
-			Null: false,
+			Null: &fl,
 		},
 	}, []string{
 		`freight_key`,
@@ -136,21 +138,23 @@ func TestUpdateReplicator(t *testing.T) {
 	}
 
 	// define table
+	tr := true
+	fl := false
 	err = r.Init(dh, `frt.freight.init`, []Column{
 		Column{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
-			Null: false,
+			Null: &tr,
 		},
 		Column{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
-			Null: false,
+			Null: &tr,
 		},
 	}, []string{
 		`freight_key`,
@@ -190,21 +194,23 @@ func TestDeleteReplicator(t *testing.T) {
 	}
 
 	// define table
+	tr := true
+	fl := false
 	err = r.Init(dh, `frt.freight.init`, []Column{
 		Column{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
-			Null: false,
+			Null: &tr,
 		},
 		Column{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
-			Null: false,
+			Null: &fl,
 		},
 		Column{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
-			Null: false,
+			Null: &fl,
 		},
 	}, []string{
 		`freight_key`,

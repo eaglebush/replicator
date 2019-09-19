@@ -22,9 +22,9 @@ type Replicator struct {
 
 // Column - replication column for initialization of replicator
 type Column struct {
-	Name string
-	Type string
-	Null bool
+	Name string `json:"name"`
+	Type string `json:"type"`
+	Null *bool  `json:"null,omitempty"`
 }
 
 // Item - an item in the replicator
@@ -70,12 +70,19 @@ func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumn
 	subjectTable[tableName] = tableName
 	dataKeys[tableName] = dataKeyColumns
 
+	tr := true
+
 	cnt := len(tableColumns) - 1
 	sql := ``
 	sql += `CREATE TABLE ` + tableName + ` (`
 	for i, v := range tableColumns {
 		sql += `	` + v.Name + ` ` + v.Type + ` `
-		if !v.Null {
+
+		if v.Null == nil {
+			v.Null = &tr
+		}
+
+		if !*v.Null {
 			sql += `NOT `
 		}
 		sql += `NULL`
