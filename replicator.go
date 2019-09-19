@@ -17,6 +17,7 @@ import (
 type Replicator struct {
 	DecimalSign    rune
 	DigitSeparator rune
+	Debug          bool
 	Subjects       []Item
 }
 
@@ -38,10 +39,11 @@ var subjectTable map[string]string
 var dataKeys map[string][]string
 
 // NewReplicator - create a new replicator with defaults
-func NewReplicator() *Replicator {
+func NewReplicator(debug bool) *Replicator {
 	return &Replicator{
 		DecimalSign:    '.',
 		DigitSeparator: ',',
+		Debug:          debug,
 	}
 }
 
@@ -94,6 +96,10 @@ func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumn
 	}
 	sql += `);`
 
+	if r.Debug {
+		log.Println(sql)
+	}
+
 	// create table it does not exist
 	_, err = dh.Exec(sql)
 	if err != nil {
@@ -137,7 +143,9 @@ func (r *Replicator) Insert(dh *datahelper.DataHelper, subject string, msgData [
 
 	sql += `INSERT INTO ` + tbl + ` (` + cols + `) VALUES (` + vals + `);`
 
-	log.Println(sql)
+	if r.Debug {
+		log.Println(sql)
+	}
 
 	_, err = dh.Exec(sql)
 	if err != nil {
@@ -197,6 +205,10 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 		cma = ` AND `
 	}
 
+	if r.Debug {
+		log.Println(sql)
+	}
+
 	_, err = dh.Exec(sql)
 	if err != nil {
 		return err
@@ -239,6 +251,10 @@ func (r *Replicator) Delete(dh *datahelper.DataHelper, subject string, msgData [
 		cma = ` AND `
 	}
 
+	if r.Debug {
+		log.Println(sql)
+	}
+
 	_, err = dh.Exec(sql)
 	if err != nil {
 		return err
@@ -255,6 +271,11 @@ func (r *Replicator) Drop(dh *datahelper.DataHelper, subject string) error {
 	}
 
 	sql := `DROP TABLE ` + tableName + `;`
+
+	if r.Debug {
+		log.Println(sql)
+	}
+
 	_, err = dh.Exec(sql)
 	if err != nil {
 		return err
