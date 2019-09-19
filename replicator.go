@@ -240,6 +240,22 @@ func (r *Replicator) Delete(dh *datahelper.DataHelper, subject string, msgData [
 	return nil
 }
 
+// Drop - drop replicated table
+func (r *Replicator) Drop(dh *datahelper.DataHelper, subject string) error {
+	tableName, err := BuildTableName(subject)
+	if err != nil {
+		return err
+	}
+
+	sql := `DROP TABLE ` + tableName + `;`
+	_, err = dh.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // LoadReplicator - load replicator table definitions from configuration file
 func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replicator, error) {
 	b, err := ioutil.ReadFile(replicatorConfig)
@@ -300,7 +316,10 @@ func (r *Replicator) rawtstr(value []byte) string {
 	if err == nil {
 		// check the length of the decimal places
 		dotp := strings.Index(bstr, string(r.DecimalSign))
-		numdec := strconv.Itoa(len(bstr[dotp+1:]))
+		numdec := `2`
+		if dotp != -1 {
+			numdec = strconv.Itoa(len(bstr[dotp+1:]))
+		}
 		ffmt := "%." + numdec + "f"
 
 		b = fmt.Sprintf(ffmt, float32(f.(float64)))
@@ -311,7 +330,10 @@ func (r *Replicator) rawtstr(value []byte) string {
 	if err == nil {
 		// check the length of the decimal places
 		dotp := strings.Index(bstr, string(r.DecimalSign))
-		numdec := strconv.Itoa(len(bstr[dotp+1:]))
+		numdec := `2`
+		if dotp != -1 {
+			numdec = strconv.Itoa(len(bstr[dotp+1:]))
+		}
 		ffmt := "%." + numdec + "f"
 
 		b = fmt.Sprintf(ffmt, f.(float64))
