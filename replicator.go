@@ -15,8 +15,9 @@ import (
 
 // Replicator - A replicator for message-given data
 type Replicator struct {
-	AutodetectTable bool
-	Subjects        []Item
+	DecimalSign    rune
+	DigitSeparator rune
+	Subjects       []Item
 }
 
 // Column - replication column for initialization of replicator
@@ -35,6 +36,14 @@ type Item struct {
 
 var subjectTable map[string]string
 var dataKeys map[string][]string
+
+// NewReplicator - create a new replicator with defaults
+func NewReplicator() *Replicator {
+	return &Replicator{
+		DecimalSign:    '.',
+		DigitSeparator: ',',
+	}
+}
 
 // Init - initialize table
 func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumns []Column, dataKeyColumns []string) error {
@@ -110,7 +119,7 @@ func (r *Replicator) Insert(dh *datahelper.DataHelper, subject string, msgData [
 	for k, v := range objmap {
 		cols += cma + k
 
-		vals += cma + `'` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
+		vals += cma + `'` + strings.Replace(r.rawtstr(v), `'`, `''`, -1) + `'`
 		cma = `, `
 	}
 
@@ -161,7 +170,7 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 		}
 
 		if valid {
-			colvals += cma + k + `='` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
+			colvals += cma + k + `='` + strings.Replace(r.rawtstr(v), `'`, `''`, -1) + `'`
 			cma = `, `
 		}
 
@@ -177,7 +186,7 @@ func (r *Replicator) Update(dh *datahelper.DataHelper, subject string, msgData [
 	// Get filters
 	cma = ``
 	for k, v := range dataKeyValues {
-		sql += cma + k + `='` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
+		sql += cma + k + `='` + strings.Replace(r.rawtstr(v), `'`, `''`, -1) + `'`
 		cma = ` AND `
 	}
 
@@ -219,7 +228,7 @@ func (r *Replicator) Delete(dh *datahelper.DataHelper, subject string, msgData [
 	// Get filters
 	cma = ``
 	for k, v := range dataKeyValues {
-		sql += cma + k + `='` + strings.Replace(rawtstr(v), `'`, `''`, -1) + `'`
+		sql += cma + k + `='` + strings.Replace(r.rawtstr(v), `'`, `''`, -1) + `'`
 		cma = ` AND `
 	}
 
@@ -245,7 +254,6 @@ func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replic
 	}
 
 	for _, v := range rp.Subjects {
-		//rpi := v.(ReplicatorItem)
 		err = rp.Init(dh, v.SubjectRoot, v.Columns, v.DataKeys)
 		if err != nil {
 			return nil, err
@@ -255,7 +263,7 @@ func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replic
 	return &rp, nil
 }
 
-func rawtstr(value []byte) string {
+func (r *Replicator) rawtstr(value []byte) string {
 	var b string
 
 	bstr := strings.Trim(string(value), `"`)
@@ -291,7 +299,7 @@ func rawtstr(value []byte) string {
 	f, err = strconv.ParseFloat(bstr, 32)
 	if err == nil {
 		// check the length of the decimal places
-		dotp := strings.Index(bstr, `.`)
+		dotp := strings.Index(bstr, string(r.DecimalSign))
 		numdec := strconv.Itoa(len(bstr[dotp+1:]))
 		ffmt := "%." + numdec + "f"
 
@@ -302,7 +310,7 @@ func rawtstr(value []byte) string {
 	f, err = strconv.ParseFloat(bstr, 64)
 	if err == nil {
 		// check the length of the decimal places
-		dotp := strings.Index(bstr, `.`)
+		dotp := strings.Index(bstr, string(r.DecimalSign))
 		numdec := strconv.Itoa(len(bstr[dotp+1:]))
 		ffmt := "%." + numdec + "f"
 

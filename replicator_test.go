@@ -258,6 +258,8 @@ func TestTimeConversion(t *testing.T) {
 
 	// ifc = 3
 	// log.Println(anytstr(ifc))
-	log.Println(rawtstr([]byte(`2019-09-11T00:00:00.000Z`)))
-	log.Println(rawtstr([]byte(`2019-09-18T06:24:15.2669612Z`)))
+	r := NewReplicator()
+	log.Println(r.rawtstr([]byte(`2019-09-11T00:00:00.000Z`)))
+	log.Println(r.rawtstr([]byte(`2019-09-18T06:24:15.2669612Z`)))
+	log.Println(r.rawtstr([]byte(`150,405.2669612Z`)))
 }
