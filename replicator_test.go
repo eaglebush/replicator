@@ -247,7 +247,7 @@ func TestLoadReplicator(t *testing.T) {
 		return
 	}
 
-	rp, err := LoadReplicator(dh, `./replicator.json`)
+	rp, err := LoadReplicator(dh, `./replicator.json`, false)
 	log.Printf("Replicators: %v", rp)
 }
 

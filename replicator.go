@@ -18,6 +18,7 @@ type Replicator struct {
 	DecimalSign    rune
 	DigitSeparator rune
 	Debug          bool
+	DropReplicated bool
 	Subjects       []Item
 }
 
@@ -71,6 +72,10 @@ func (r *Replicator) Init(dh *datahelper.DataHelper, subject string, tableColumn
 	}
 	subjectTable[tableName] = tableName
 	dataKeys[tableName] = dataKeyColumns
+
+	if r.DropReplicated {
+		r.Drop(dh, subject)
+	}
 
 	tr := true
 
@@ -285,7 +290,7 @@ func (r *Replicator) Drop(dh *datahelper.DataHelper, subject string) error {
 }
 
 // LoadReplicator - load replicator table definitions from configuration file
-func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string) (*Replicator, error) {
+func LoadReplicator(dh *datahelper.DataHelper, replicatorConfig string, dropReplicatedTables bool) (*Replicator, error) {
 	b, err := ioutil.ReadFile(replicatorConfig)
 	if err != nil {
 		return nil, err
