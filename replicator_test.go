@@ -21,7 +21,7 @@ func TestInitReplicator(t *testing.T) {
 	// connect to database
 	dh := datahelper.NewDataHelper(config)
 	_, err = dh.Connect()
-	defer dh.Disconnect()
+	defer dh.Disconnect(false)
 	if err != nil {
 		return
 	}
@@ -29,17 +29,17 @@ func TestInitReplicator(t *testing.T) {
 	// define table
 	fl := false
 	err = r.Init(dh, `frt.freight`, []Column{
-		Column{
+		{
 			Name: `freight_key`,
 			Type: `nvarchar(38)`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
 			Null: &fl,
@@ -65,7 +65,7 @@ func TestInsertReplicator(t *testing.T) {
 	// connect to database
 	dh := datahelper.NewDataHelper(config)
 	_, err = dh.Connect()
-	defer dh.Disconnect()
+	defer dh.Disconnect(false)
 	if err != nil {
 		return
 	}
@@ -73,27 +73,27 @@ func TestInsertReplicator(t *testing.T) {
 	// define table
 	fl := false
 	err = r.Init(dh, `frt.freight.init`, []Column{
-		Column{
+		{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `priority`,
 			Type: `int`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `priority2`,
 			Type: `int`,
 			Null: &fl,
@@ -132,7 +132,7 @@ func TestUpdateReplicator(t *testing.T) {
 	// connect to database
 	dh := datahelper.NewDataHelper(config)
 	_, err = dh.Connect()
-	defer dh.Disconnect()
+	defer dh.Disconnect(false)
 	if err != nil {
 		return
 	}
@@ -141,17 +141,17 @@ func TestUpdateReplicator(t *testing.T) {
 	tr := true
 	fl := false
 	err = r.Init(dh, `frt.freight.init`, []Column{
-		Column{
+		{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
 			Null: &tr,
 		},
-		Column{
+		{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
 			Null: &tr,
@@ -188,7 +188,7 @@ func TestDeleteReplicator(t *testing.T) {
 	// connect to database
 	dh := datahelper.NewDataHelper(config)
 	_, err = dh.Connect()
-	defer dh.Disconnect()
+	defer dh.Disconnect(false)
 	if err != nil {
 		return
 	}
@@ -197,17 +197,17 @@ func TestDeleteReplicator(t *testing.T) {
 	tr := true
 	fl := false
 	err = r.Init(dh, `frt.freight.init`, []Column{
-		Column{
+		{
 			Name: `freight_key`,
 			Type: `nchar(38)`,
 			Null: &tr,
 		},
-		Column{
+		{
 			Name: `ref_address`,
 			Type: `nvarchar(400)`,
 			Null: &fl,
 		},
-		Column{
+		{
 			Name: `ref_amount`,
 			Type: `decimal(18,3)`,
 			Null: &fl,
@@ -242,7 +242,7 @@ func TestLoadReplicator(t *testing.T) {
 	// connect to database
 	dh := datahelper.NewDataHelper(config)
 	_, err = dh.Connect()
-	defer dh.Disconnect()
+	defer dh.Disconnect(false)
 	if err != nil {
 		return
 	}
